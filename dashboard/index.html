@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Multinacional de Eletrônicos</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app" class="container">
+        <header>
+            <h1>Painel Administrativo</h1>
+            <p>Multinacional de Eletrônicos</p>
+        </header>
+        <main>
+            <div class="grid">
+                <div class="card">
+                    <h2>Usuários Registrados</h2>
+                    <p>{{ metrics.users }}</p>
+                </div>
+                <div class="card">
+                    <h2>Vendas Hoje</h2>
+                    <p>{{ metrics.sales }}</p>
+                </div>
+                <div class="card">
+                    <h2>Visitas ao Site</h2>
+                    <p>{{ metrics.visits }}</p>
+                </div>
+                <div class="card">
+                    <h2>Feedbacks</h2>
+                    <p>{{ metrics.feedbacks }}</p>
+                </div>
+            </div>
+            <div class="charts-container">
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="lineChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+            <div class="table-container">
+                <h2>Tabela de Vendas</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="sale in salesData" :key="sale.product">
+                            <td>{{ sale.product }}</td>
+                            <td>{{ sale.quantity }}</td>
+                            <td>R$ {{ sale.value.toFixed(2) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                metrics: {
+                    users: '1.234',
+                    sales: '56',
+                    visits: '3.456',
+                    feedbacks: '23',
+                },
+                salesData: [
+                    { product: 'Smartphone', quantity: 20, value: 8000 },
+                    { product: 'Tablet', quantity: 15, value: 4500 },
+                    { product: 'Laptop', quantity: 10, value: 20000 },
+                ],
+                lineChartData: [15, 30, 45, 25, 60, 40],
+                pieChartData: [300, 50, 100, 40],
+                radarChartData: {
+                    labels: ['Qualidade', 'Preço', 'Satisfação', 'Design', 'Durabilidade'],
+                    datasets: [{
+                        label: 'Avaliação de Produtos',
+                        data: [80, 70, 90, 85, 75],
+                        backgroundColor: 'rgba(255, 206, 86, 0.5)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 1
+                    }]
+                }
+            },
+            mounted() {
+                this.renderCharts();
+            },
+            methods: {
+                renderCharts() {
+                    // Gráfico de Vendas
+                    const salesCtx = document.getElementById('salesChart').getContext('2d');
+                    new Chart(salesCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: this.salesData.map(sale => sale.product),
+                            datasets: [{
+                                label: 'Vendas',
+                                data: this.salesData.map(sale => sale.quantity),
+                                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            },
+                            animations: {
+                                tension: {
+                                    duration: 1000,
+                                    easing: 'linear',
+                                    from: 1,
+                                    to: 0,
+                                    loop: true
+                                }
+                            }
+                        }
+                    });
+
+                    // Gráfico de Linhas
+                    const lineCtx = document.getElementById('lineChart').getContext('2d');
+                    new Chart(lineCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'],
+                            datasets: [{
+                                label: 'Tráfego do Site',
+                                data: this.lineChartData,
+                                backgroundColor: 'rgba(75, 192, 192, 0.4)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 2,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+
+                    // Gráfico de Pizza
+                    const pieCtx = document.getElementById('pieChart').getContext('2d');
+                    new Chart(pieCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Smartphones', 'Tablets', 'Laptops', 'Acessórios'],
+                            datasets: [{
+                                label: 'Distribuição de Vendas',
+                                data: this.pieChartData,
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.6)',
+                                    'rgba(54, 162, 235, 0.6)',
+                                    'rgba(255, 206, 86, 0.6)',
+                                    'rgba(75, 192, 192, 0.6)',
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true
+                        }
+                    });
+
+                    // Gráfico de Radar
+                    const radarCtx = document.getElementById('radarChart').getContext('2d');
+                    new Chart(radarCtx, {
+                        type: 'radar',
+                        data: this.radarChartData,
+                        options: {
+                            elements: {
+                                line: {
+                                    tension: 0.5
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
